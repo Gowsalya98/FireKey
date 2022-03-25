@@ -1,0 +1,37 @@
+const express = require('express')
+const cors = require('cors')
+const dotenv = require('dotenv').config()
+
+const errorThrower = require('./errorHandler/error_thrower')
+const appError = require('./errorHandler/common_error_handler')
+require('./config/db_config')
+const app = express()
+
+const superAdmin=require('./superAdmin/superAdmin_route')
+const user=require('./userDetails/user_route')
+const property=require('./propertyDetails/property_route')
+const interestBuyer=require('./interestBuyer/interest_route')
+const payment=require('./paymentDetails/payment_route')
+const report=require('./report/report_route')
+
+app.use(cors())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+app.use('/uploads', express.static('/home/fbnode/NODE_GOWSI/uploads/firekey'))
+
+app.use('/firekeey/superAdmin',superAdmin)
+app.use('/firekeey/user',user)
+app.use('/firekeey/property',property)
+app.use('/firekeey/interestBuyer',interestBuyer)
+app.use('/firekeey/payment',payment)
+app.use('/firekeey/report',report)
+
+app.get('/',(req,res)=>{
+    res.send('welcome FireKey')
+})
+
+app.listen(process.env.PORT, () => {
+    console.log("port running on ", process.env.PORT)
+})
+
