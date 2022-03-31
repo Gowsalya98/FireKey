@@ -1,6 +1,7 @@
 const{register,otpSchema}=require('./user_model')
 const{randomString,makeId}=require('../middleware/randomString')
 const{superadmin}=require('../superAdmin/superAdmin_models')
+const{property}=require('../propertyDetails/property_model')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const nodemailer=require('nodemailer')
