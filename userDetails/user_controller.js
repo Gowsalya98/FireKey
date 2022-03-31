@@ -237,8 +237,8 @@ exports.updateUserProfile = async (req, res) => {
     try {
         const userToken=jwt.decode(req.headers.authorization)
         const id=userToken.userid
-        register.findByIdAndUpdate({_id:id}, req.body,{ new: true }, (err, data) => {
-            console.log(data)
+        register.findOneAndUpdate({_id:id}, req.body,{ new: true }, (err, data) => {
+            console.log('line 241',data)
             if (!err) {
                 res.status(200).send({ message: 'updated successfully', data })
             } else {
@@ -261,8 +261,9 @@ exports.deleteUserProfile = async (req, res) => {
             if (datas) {
                 register.findOneAndUpdate({ _id:id }, { $set: { deleteFlag: "true" } }, { returnOriginal: false }, (err, data) => {
                     if (!err)
-                        res.status(200).send({ message: "Delete Data Successfully" })
                     console.log(data)
+                        res.status(200).send({ message: "Delete Data Successfully",data })
+                   
                 })
             } else { res.status(400).send('Data is not found') }
         })
