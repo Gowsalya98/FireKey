@@ -8,8 +8,8 @@ const jwt = require('jsonwebtoken')
 exports.getPackagePaymentList = async (req, res) => {
 
     try {
-        var listOfInterestSellerData = await interestBuyer.find({}).populate([{ path: 'userInterestBy', select: ['userName', 'contact'] },
-        { path: 'propertySchema', select: ['landDetails', 'areaLocation'] }])
+        var listOfInterestSellerData = await interestBuyer.find({}).populate([{ path: 'userData', select: ['userName', 'contact'] },
+        { path: 'propertyData', select: ['landDetails','agentOrOwnerName', 'areaLocation'] }])
 
         payment.find({ paymentId: req.body.paymentId }, (err, data) => {
             console.log(data)
@@ -64,16 +64,14 @@ exports.paymentDetails =  (req, res) => {
         const date = Date.now().toString()
         req.body.paymentId = unique + date
         console.log(req.body.paymentId)
-        // res.status(200).send(req.body.payment)
-        // var k=Date.now()
-        // console.log(k)
-        payment.create(req.body, (err, data) => {
-            console.log(data)
-            if (err) throw err
-            else {
-                res.status(200).send({ message:"Successfully Created",data })
-            }
-        })
+        req.body.paymentOn=new Date().toLocaleString()
+                payment.create(req.body,(err,data)=>{
+                    if(err){throw err}
+                    else{
+                        console.log('line 14',data)
+                        res.status(200).send({message:"successfully payed",data})
+                    }
+                })
     } catch (err) {
         res.status(500).send({ message: err.message })
     }

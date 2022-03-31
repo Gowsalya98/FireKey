@@ -2,10 +2,15 @@
 const mongoose = require('mongoose')
 
 const paymentSchema = mongoose.Schema({
-    paymentId: String,
-    bankName: String,
-    paymentMode: String,
-    amount: Number,
+    accountHolderName:String,
+    paymentId:String,
+    bankName:String,
+    branchAddress:String,
+    accountNumber:String,
+    IFSCCode:String,
+    location:String,
+    paymentOn:String,
+    amount:String,
     transactionStatus: {
         type: String,
         default: "Success"
