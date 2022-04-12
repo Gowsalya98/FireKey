@@ -191,7 +191,7 @@ const getSellerList = async (req, res) => {
 const updateProperty = async (req, res) => {
     try {
         console.log('line 106',req.params.id)
-       property.find({ _id: req.params.id, deleteFlag:'false'}, (err, datas) => {
+       property.findOne({ _id: req.params.id, deleteFlag:'false'}, (err, datas) => {
             if (err) throw err
             property.findOneAndUpdate({_id:req.params.id},req.body, {new:true}, (err, data) => {
                 if(err)throw err

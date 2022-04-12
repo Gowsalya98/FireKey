@@ -238,6 +238,9 @@ exports.updateUserProfile = async (req, res) => {
     try {
         const userToken=jwt.decode(req.headers.authorization)
         const id=userToken.userid
+        register.findOne({ _id:id,deleteFlag:"false"}, (err, datas) => {
+            //console.log(data)
+            if (datas) {
         register.findOneAndUpdate({_id:id}, req.body,{ new: true }, (err, data) => {
             console.log('line 241',data)
             if (!err) {
@@ -246,6 +249,8 @@ exports.updateUserProfile = async (req, res) => {
                 res.status(400).send({ message: 'invalid id' })
             }
         })
+    }
+})
     } catch (err) {
         res.status(500).send({ message: err.message })
     }
@@ -257,7 +262,7 @@ exports.deleteUserProfile = async (req, res) => {
     try {
         const userToken=jwt.decode(req.headers.authorization)
         const id=userToken.userid
-        register.findOne({ _id:id }, (err, datas) => {
+        register.findOne({ _id:id,deleteFlag:"false"}, (err, datas) => {
             //console.log(data)
             if (datas) {
                 register.findOneAndUpdate({ _id:id }, { $set: { deleteFlag: "true" } }, { returnOriginal: false }, (err, data) => {

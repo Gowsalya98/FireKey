@@ -2,6 +2,7 @@
 const {payment} = require('./payment_model')
 const{property} = require('../propertyDetails/property_model')
 const {interestBuyer} = require('../interestBuyer/interest_model')
+const razorpay=require('razorpay')
 const jwt = require('jsonwebtoken')
 
 
@@ -58,6 +59,24 @@ exports.getPackagePaymentList = async (req, res) => {
     }
 }
 
+exports.createOrderId=async(req,res)=>{
+
+    var instance = new razorpay({ 
+        key_id: 'rzp_test_GUxQPzcyYr9u9P', 
+        key_secret: 'L33CkDSL2wI8qOHhIQRnZOoF' 
+    })
+
+  var options = {
+    amount: 100,  // amount in the smallest currency unit
+    currency: "INR",
+    receipt: "order_rcptid_11"
+  };
+  instance.orders.create(options, function(err, order) {
+    console.log(order);
+    res.send(order)
+  });
+}
+
 exports.paymentDetails =  (req, res) => {
     try {
         const unique = makeid(5)
@@ -76,6 +95,7 @@ exports.paymentDetails =  (req, res) => {
         res.status(500).send({ message: err.message })
     }
 }
+
 function makeid(length) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

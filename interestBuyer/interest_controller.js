@@ -1,4 +1,3 @@
-
 const {interestBuyer} = require('./interest_model')
 const {property} = require('../propertyDetails/property_model')
 const {register}=require('../userDetails/user_model')
@@ -28,7 +27,6 @@ exports.interestBuyer = async (req, res) => {
                 res.status(400).send('Invalid Authentication')
             }
         })
-        
     } catch (err) {
         res.status(500).send(err.message)
     }
@@ -60,8 +58,8 @@ exports.getAllInterestList =  (req, res) => {
     } catch (err) {
         res.status(500).send({ message: err.message })
     }
-
 }
+
 exports.getSingleBuyerInterestList =(req, res) => {
     try {
         interestBuyer.findOne({ _id: req.params.id,deleteFlag:'false'},(err,data)=>{
