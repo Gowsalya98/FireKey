@@ -7,57 +7,52 @@ const jwt = require('jsonwebtoken')
 const nodemailer=require('nodemailer')
 const fast2sms=require('fast-two-sms')
 const { validationResult } = require('express-validator')
+const mongoose = require('mongoose')
 
 exports.registerForUser = async(req, res) => {
     try {
-        console.log('line 10',req.body)
-        const errors = await validationResult(req)
-        if (!errors.isEmpty()) {
-            console.log("line 11",errors)
-            res.status(400).send({ message: errors.array() })
-        } else {
-            register.countDocuments({ email: req.body.email }, async (err,num) => {
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            res.json({message:errors.array()})
+        }else{
+            const num= await register.aggregate([{$match:{ email: req.body.email }}])
                 console.log("line 17",num)
-                if (num == 0) {
-                    const confirmPassword=req.body.confirmPassword
-                   if(req.body.password==confirmPassword){
+                if (num.length== 0) {
+                   if(req.body.password==req.body.confirmPassword){
                     req.body.password = await bcrypt.hash(req.body.password, 10)
-                    //const confirmPassword =await bcrypt.hash(req.body.confirmPassword,10)
+                    req.body.confirmPassword=await bcrypt.hash(req.body.confirmPassword,10)
                     register.create(req.body, (err, data) => {
                         if (data) {
-                            console.log("line 25",data)
-                            if(req.body.email == data.email&&req.body.contact==data.contact){
-                                const buyerId = makeId(24)
-                                console.log("buyerId", buyerId)
-                                register.findOneAndUpdate({email:req.body.email},{$set:{buyerId:buyerId}},{new:true},async(err, datas) => {
-                                    console.log("line 32", datas)
-                                    if (datas) {
-                                        console.log("line 35", datas)
-                                        postMail( data.email, 'BuyerId For Firekey Site', buyerId)
-                                        console.log('line 37', buyerId)
-                                        const response = await fast2sms.sendMessage({ authorization: process.env.OTPKEY,message:buyerId,numbers:[data.contact]})
-                                        console.log('line 38',response)
-                                        res.status(200).send({ message: 'Register successfull', data,buyerId})
-                                    }else{res.status(400).send('does not create buyer id')}
-                                })
-                            }else{res.status(400).send('invalid user') }     
+                            // console.log("line 25",data)
+                            // if(req.body.email == data.email&&req.body.contact==data.contact){
+                            //     const buyerId = makeId(24)
+                            //     console.log("buyerId", buyerId)
+                            //     register.findOneAndUpdate({email:req.body.email},{$set:{buyerId:buyerId}},{new:true},async(err, datas) => {
+                            //         console.log("line 32", datas)
+                            //         if (datas) {
+                            //             console.log("line 35", datas)
+                            //             postMail( data.email, 'BuyerId For Firekey Site', buyerId)
+                            //             console.log('line 37', buyerId)
+                            //             const response = await fast2sms.sendMessage({ authorization: process.env.OTPKEY,message:buyerId,numbers:[data.contact]})
+                            //             console.log('line 38',response)
+                                        res.status(200).send({ success:'true',message: 'Register successfull', data})
+                                   // }else{res.status(400).send('does not create buyer id')}
+                                //})
+                           // }else{res.status(400).send({success:'false',message:'invalid user'}) }     
                         } else {
-                            console.log("line 44",'Register Failed')
-                            res.staus(400).send({ message: 'failed to register data' })
+                             res.staus(400).send({ success:'false',message: 'failed to register data' })
                         }
-                    })
+                   })
                    }else{
-                       res.status(400).send({message:"password & confirm password does not match"})
+                       res.status(400).send({success:'false',message:'password & confirm password does not match'})
                    }
                    
                 } else {
-                    console.log("line 53","email is already exists")
-                    res.status(400).send({ message: 'email is already exists' })
+                    res.status(400).send({success:'false',message:'your email already exists,please try another'})
                 }
-            })
         }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({success:'false',message:'internal server error'})
     }
 }
 exports.verificationMailForUser=(req,res)=>{
@@ -74,29 +69,33 @@ exports.verificationMailForUser=(req,res)=>{
         }else{res.status(400).send({message:'invalid id'})}
         })
     }catch(err){
-        res.status(500).send({message:err.message})
+        res.status(500).send({message:"internal server error"})
     }
 }
 
-exports.userLogin = (req, res) => {
+exports.userLogin = async(req, res) => {
     try {
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            return res.status(400).send({ errors: errors.array() })
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            res.json({message:errors.array()})
         } else {
-            register.findOne({ email: req.body.email }, async (err, data) => {
+            console.log(req.body)
+            const data=await register.findOne({ email: req.body.email})
                 if (data) {
-                    const password = await bcrypt.compare(data.password, req.body.password)
-                    const userid = data._id
-                    const token = jwt.sign({ userid }, 'secretKey')
-                    res.status(200).send({ message: "Login Successfully", token, data })
+                    console.log('line 84',data)
+                     const password=await bcrypt.compare(req.body.password,data.password)
+                    if(password==true){
+                        console.log('line 87',password)
+                    const token = (jwt.sign({id:data._id}, 'secretKey'))
+                    res.status(200).send({ success:'true',message: "Login Successfully", token, data:data })
                 } else {
-                    res.status(400).send({ message: "invaild email" })
+                    res.status(400).send({ success:'false',message: "invaild password",data:[]})
                 }
-            })
-        }
+        }else{res.status(400).send({ success:'false',message: "data not exist",data:[]})}
+    }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        console.log(err)
+        res.status(500).send({success:'false',message:'internal server error'})
     }
 }
 
@@ -186,94 +185,69 @@ const postMail = function ( to, subject, text) {
     })
 }
 
-exports.getAllUserList = (req, res) => {
+exports.getAllUserList = async(req, res) => {
     try {
-        const superAdminToken=jwt.decode(req.headers.authorization)
-        const id=superAdminToken.userid
-        superadmin.findOne({_id:id,deleteFlag:"false"},(err,datas)=>{
-            if(datas){
-                register.find({role:"Buyer",deleteFlag:"false"}, (err, data) => {
-                    console.log('line 70',data)
-                    if (data) {
-                        console.log('line 72',data)
-                        res.status(200).send({ message: data })
-                    } else {
-                        console.log('your data is already deleted')
-                        res.status(400).send({ message: 'your data is already deleted' })
-                    }
-        
-                })
-            }else{res.status(400).send('unauthorized')}
-        })
+        const data=await register.aggregate([{$match:{"deleteFlag":false}}])
+        console.log('line 190',data)
+        if(data.length!=0){
+            data.sort().reverse()
+            res.status(200).send({success:'true',message:'All datas',data:data})
+        }else{
+            res.status(400).send({success:'false',message:'data not found',data:[]})
+        }
         
     } catch (err) {
-        res.status(500).send({ message: err })
+        res.status(500).send({message:"internal server error"})
     }
 }
 
-exports.getSingleUser = (req, res) => {
+exports.getSingleUser = async(req, res) => {
     try {
-        const userToken=jwt.decode(req.headers.authorization)
-        const id=userToken.userid
-        register.findOne({ _id:id }, (err, data) => {
-            if (err) {
-                res.status(400).send({ message: 'something error in this process' })
-            } else {
-                if (data.deleteFlag == 'false') {
-                    console.log(data)
-                    res.status(200).send({ message: data })
-                } else {
-                    console.log('your data is already deleted')
-                    res.status(400).send({ message: 'your data is already deleted' })
-                }
+        if(req.params.userId.length==24){
+            const data=await register.aggregate([{$match:{$and:[{"_id":new mongoose.Types.ObjectId(req.params.userId)},{'deleteFlag':false}]}}])
+            if(data!=null){
+                res.status(200).send({success:'true',message:'your data',data:data})
+            }else{
+                res.status(302).send({success:'false',data:[]})
             }
-        })
+        }else{
+            res.status(400).send({success:'false',message:'please provide a valid id'})
+        }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({message:"internal server error"})
     }
 }
 
 exports.updateUserProfile = async (req, res) => {
-    console.log(req.body)
     try {
+        if(req.headers.authorization){
         const userToken=jwt.decode(req.headers.authorization)
-        const id=userToken.userid
-        register.findOne({ _id:id,deleteFlag:"false"}, (err, datas) => {
-            //console.log(data)
-            if (datas) {
-        register.findOneAndUpdate({_id:id}, req.body,{ new: true }, (err, data) => {
-            console.log('line 241',data)
-            if (!err) {
-                res.status(200).send({ message: 'updated successfully', data })
+        const id=userToken.id
+       const data=await register.findByIdAndUpdate({_id:id},{$set: req.body},{ new: true })
+            if (data!=null) {
+                res.status(200).send({ success:'true',message: 'updated successfully',data:data })
             } else {
-                res.status(400).send({ message: 'invalid id' })
+                res.status(302).send({success:'false',data:[]})
             }
-        })
-    }
-})
+        }else{ res.status(400).send({ message: "unauthorized" })}
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({message:"internal server error"})
     }
-
-
 }
 
 exports.deleteUserProfile = async (req, res) => {
     try {
+        if(req.headers.authorization){
         const userToken=jwt.decode(req.headers.authorization)
-        const id=userToken.userid
-        register.findOne({ _id:id,deleteFlag:"false"}, (err, datas) => {
-            //console.log(data)
-            if (datas) {
-                register.findOneAndUpdate({ _id:id }, { $set: { deleteFlag: "true" } }, { returnOriginal: false }, (err, data) => {
-                    if (!err)
-                    console.log(data)
-                        res.status(200).send({ message: "Delete Data Successfully",data })
-                   
-                })
-            } else { res.status(400).send('Data is not found') }
-        })
-    } catch (err) { res.status(500).send({ message: err.message }) }
+        const id=userToken.id
+        const data=await register.findOneAndUpdate({ _id:id }, { $set: { deleteFlag: "true" } }, { returnOriginal: false })
+            if (data!=null){
+                        res.status(200).send({ success:'true',message: "Delete Data Successfully",data:data })
+                } else { res.status(302).send({success:'false',data:[]})}
+    }else{
+        res.status(400).send({ message: "unauthorized" })
+    }
+    } catch (err) { res.status(500).send({ message: "internal server error" }) }
 }
 
 exports.searchPropertyForBuyer = async (req, res) => {

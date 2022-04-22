@@ -24,11 +24,9 @@ const addProperty = async (req, res) => {
                         req.body.landImage = `http://192.168.0.112:8040/uploads/${req.file.filename}`
                     }
                     console.log('line 31',req.file)
-                    //  console.log(typeof(req.body.landDetails))
                     var k = await JSON.parse(req.body.landDetails)
                     console.log("k",k);
                     req.body.landDetails = k
-                    // JSON.parse(req.body)
                     var myDate = new Date();
                     req.body.createdAt=myDate.toISOString();
                     
@@ -60,7 +58,7 @@ const sellerGetOwnPropertyList = async (req, res) => {
         property.find({propertyId:id }, (err, data) => {
             console.log('line 55',data)
 
-            if (data[0].deleteFlag == 'false') {
+            if (data.deleteFlag == 'false') {
                 console.log(data)
                 res.status(200).send({ message: data })
             } else {

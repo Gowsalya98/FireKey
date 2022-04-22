@@ -5,17 +5,14 @@ const userRegisterSchema = mongoose.Schema({
     email: String,
     password: String,
     newPassword:String,
-    contact: Number,
-    buyerId:String,
+    confirmPassword:String,
+    receiveNewsLetter:String,
+    // contact: Number,
+    // buyerId:String,
     deleteFlag: {
-        type: String,
+        type: Boolean,
         default: false
-    },
-    role:{
-        type:String,
-        default:"Buyer"
     }
-
 })
 
 const otp = mongoose.Schema({
