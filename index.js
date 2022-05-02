@@ -20,12 +20,12 @@ app.use(express.json())
 
 app.use('/uploads', express.static('/home/fbnode/NODE_GOWSI/uploads/firekey'))
 
-app.use('/firekeey/superAdmin',superAdmin)
-app.use('/firekeey/user',user)
-app.use('/firekeey/property',property)
-app.use('/firekeey/interestBuyer',interestBuyer)
-app.use('/firekeey/payment',payment)
-app.use('/firekeey/report',report)
+app.use('/admin',superAdmin)
+app.use('/user',user)
+app.use('/property',property)
+app.use('/user/interest',interestBuyer)
+app.use('/payment',payment)
+app.use('/admin/report',report)
 
 app.get('/',(req,res)=>{
     res.send('welcome FireKey')

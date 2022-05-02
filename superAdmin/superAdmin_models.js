@@ -8,10 +8,11 @@ const superAdminSchema = mongoose.Schema({
         type: String,
         default: "superadmin"
     },
-    deleteFlag:{
-        type:String,
-        default:false
+    createdAt:{
+        type:Date,
+        default:new Date()
     }
+    
 })
 
 const superadmin = mongoose.model("superAdminSchema", superAdminSchema)

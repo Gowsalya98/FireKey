@@ -1,5 +1,6 @@
 
 const mongoose = require('mongoose')
+const {body,validationResult}=require('express-validator')
 
 const Residential_Commercial_Land_Schema = mongoose.Schema({
     propertyName: String,
@@ -11,38 +12,112 @@ const Residential_Commercial_Land_Schema = mongoose.Schema({
         type:String,
         default:""
     },
-    squareFt: String,
-    price: String,
-    fixedPrice:String,
-    negotiable:String
+    minSquareFt: String,
+    maxSquareFt:String,
+    price: String
 })
-const addPropertySchema = mongoose.Schema({
-    createdAt:String,
+const propertySchema = mongoose.Schema({
     agentOrOwnerName: String,
     email: String,
     contact: Number,
-    typeOfLand: String,
-    sellOrRentOrLease:String,
+    propertyType: String,
+    propertyStatus:String,
+    propertyOwnerId:String,
     landDetails: Residential_Commercial_Land_Schema,
-    areaLocation: String,
-    street:String,
+    location:{
+        propertyLatitude:String,
+        propertyLongititude:String
+    },
+    Address:String,
     city: String,
-    state: String,
-    pincode: String,
-    landImage: String,
+    propertyImage: String,
     ownerShip: String,
-    remarks: String,
-    deleteFlag: {
-        type: String,
+    label:String,
+    description: String,
+    storage: {
+        type: Boolean,
         default: false
     },
-    role:{
-        type:String,
-        default:'Seller'
+    balcony: {
+        type: Boolean,
+        default: false
     },
-    propertyId:String
+    parking:{
+        type:Boolean,
+        default:false
+    },
+    nearByPark:{
+        type:Boolean,
+        default:false
+    },
+    nearBySchool:{
+        type:Boolean,
+        default:false
+    },
+    nearByGrounds:{
+        type:Boolean,
+        default:false
+    },
+    nearByHospitals:{
+        type:Boolean,
+        default:false
+    },
+    nearByTransport:{
+        type:Boolean,
+        default:false
+    },
+    createdAt:{
+        type:Date,
+        default:new Date()
+    },
+    deleteFlag:{
+        type:Boolean,
+        default:false
+    },
+    rating:{
+        type:String,
+        default:'0'
+    },
+    packageStatus:{
+        type:String,
+        default:'free'
+    },
+    
 })
 
-const property=mongoose.model('propertySchema',addPropertySchema)
+const ratingSchema=mongoose.Schema({
+    deleteFlag:{
+        type:Boolean,
+        default:false
+    },
+    rating:String,
+    createdAt:{
+        type:Date,
+        default:Date.now()
+    }
+})
 
-module.exports = { property}
+const propertyImageSchema=mongoose.Schema({
+    propertyImage:String,
+    deleteFlag:{
+        type:Boolean,
+        default:false
+    },
+    createdAt:{
+        type:Date,
+        default:Date.now()
+    }
+})
+const validation = [
+    body('email').trim().isEmail().withMessage('email is required'),
+    body('contact').isMobilePhone().withMessage('contact is required'),
+    body('address').isLength({min:1}).withMessage('address is required'),
+    body('propertyName').isAlphanumeric().withMessage('property name is required'),
+    body('city').isString().withMessage('city is required')
+]
+
+const property=mongoose.model('propertySchema',propertySchema)
+const image=mongoose.model('propertyImageSchema',propertyImageSchema)
+const rating=mongoose.model('ratingSchema',ratingSchema)
+
+module.exports = { property,image,rating,validation}

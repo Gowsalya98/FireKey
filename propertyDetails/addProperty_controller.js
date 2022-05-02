@@ -1,98 +1,156 @@
+const mongoose=require('mongoose')
 const {register} = require('../userDetails/user_model')
 const{superadmin}=require('../superAdmin/superAdmin_models')
-const {property} = require('./property_model')
+const {property,image} = require('./property_model')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
 
 
 const addProperty = async (req, res) => {
-    console.log('line 14',req.body)
     try {
-            console.log('line 19',req.body)
-            register.findOne({ email: req.body.email,deleteFlag:'false'}, async (err, data) => {
-                 console.log("line 20",data)
-                req.body.agentOrOwnerName = data.userName
-                req.body.contact = data.contact
-                const token = jwt.decode(req.headers.authorization)
-                console.log("line 24",token)
-                const id = token.userid
-                req.body.propertyId = id
-                if (data) {
-                    if (req.file == undefined || null) {
-                        req.body.landImage = ""
-                    } else {
-                        req.body.landImage = `http://192.168.0.112:8040/uploads/${req.file.filename}`
+        const errors=validationResult(req)
+    if(!errors.isEmpty()){
+        res.json({message:errors.array()})
+    }else{
+        if(req.headers.authorization){
+            const token=await jwt.decode((req.headers.authorization))
+            req.body.propertyOwnerId=token.id
+          //  req.body.propertyStatus=req.params.label
+            property.create(req.body,(err,data)=>{
+                if(err){
+                    res.status(400).send({success:'false',message:'failed'})
+                }else{
+                    if(data!=null){
+                      console.log(data)
+                        res.status(200).send({success:'true',message:'create successfully',data})
+                    }else{
+                      res.status(200).send({success:'false',message:'failed',data:[]})
                     }
-                    console.log('line 31',req.file)
-                    var k = await JSON.parse(req.body.landDetails)
-                    console.log("k",k);
-                    req.body.landDetails = k
-                    var myDate = new Date();
-                    req.body.createdAt=myDate.toISOString();
-                    
-                    register.findOneAndUpdate({email:req.body.email},{$set:{role:'seller'}},{new:true},(err,datas)=>{
-                        if(err)throw err
-                        console.log('line 32',datas)
-                        property.create(req.body, (err, result) => {
-                            if (err) throw err
-                            console.log("line 50",result)
-                            res.status(200).send({ message: "Successfully Created",result })
-                           
-                        })
-                    })
-                   
-                } else {
-                    res.status(400).send({ message: "This Email already Exists" })
                 }
             })
-        
+            }else{
+                res.status(200).send({success:'false',message:'unauthorized'})
+            }
+    }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({ message: 'internal server error' })
     }
 }
+const propertyImage=async(req,res)=>{
+    try{
+      req.body.propertyImage=`http://192.168.0.112:8040/uploads/${req.file.originalname}`
+      image.create(req.body,async(err,data)=>{
+        if(err){
+          res.status(400).send({success:'false',message:'failed'})
+        }else{
+          res.status(200).send({success:'true',message:'property image created successfully',data})
+        }
+      })
+    }catch(err){
+      res.status(500).send({message:'internal server error'})
+    }
+  }
 
 const sellerGetOwnPropertyList = async (req, res) => {
     try{
         const ownerToken=jwt.decode(req.headers.authorization)
-        const id=ownerToken.userid
-        property.find({propertyId:id }, (err, data) => {
-            console.log('line 55',data)
-
-            if (data.deleteFlag == 'false') {
-                console.log(data)
-                res.status(200).send({ message: data })
-            } else {
-                console.log('Your data is already deleted')
-                res.status(400).send({ message: 'Your data is already deleted' })
-            }
-
-        })
-    } catch (err) {
-        res.status(500).send({ message: err.message })
+        if(ownerToken!=undefined){
+            const data=await property.aggregate([{$match:{propertyOwnerId:ownerToken.id}}])
+            const arr=[]
+            if(data.length!=0){
+                const datas=data.map((result)=>{
+                    result.deleteFlag=='false'
+                    return arr.push(result)
+                })
+                arr.sort().reverse()
+                res.status(200).send({success:'true',message:'your own property',data: arr });
+      } else {
+        res.status(302).send({success:'false',message:'failed',data: [] });
+      }
+    } else {
+      res.status(400).send("unauthorized");
     }
+  } catch (err) {
+      console.log(err);
+    res.status(500).send({message:"internal server error"});
+  }
 }
 
-const getAllPropertyList=(req,res)=>{
+const getAllPropertyList=async(req,res)=>{
     try{
-        const userToken=jwt.decode(req.headers.authorization)
-        const id=userToken.userid
-        register.findOne({_id:id,deleteFlag:"false"},(err,datas)=>{
-            if(datas){
-        property.find({deleteFlag:'false'}, (err, data) => {
-            if(err)throw err
-            console.log(data)
-            res.status(200).send({ message: data })
-    })
-    }else{
-        res.status(400).send('unauthorized')
-    }
-        })
+        const adminToken=jwt.decode(req.headers.authorization)
+        if(adminToken!=undefined){
+            console.log('line 83',adminToken.id);
+            const data=await property.aggregate([{$match:{deleteFlag:false}}])
+                data.sort().reverse()
+                res.status(200).send({success:'true',message:'All property list',data: data });
+      } else {
+        res.status(302).send({success:'false',message:'unauthorized',data: [] });
+      }
     }catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({ message:"internal server error" })
     }
 }
 
-const selectedPropertyList=(req,res)=>{
+const getSinglePropertyData = async (req, res) => {
+    try {
+        if(req.params.propertyId.length==24){
+            const data=await property.aggregate([{$match:{$and:[{"_id":new mongoose.Types.ObjectId(req.params.propertyId)},{"deleteFlag":false}]}}])
+            if(data!=null){
+                res.status(200).send({success:'true',message:'your data' ,data: data });
+            } else {
+              res.status(302).send({success:'false',message:'failed', data: [] });
+            }
+          } else {
+            res.status(400).send({ message: "please provide a valid id" });
+          }
+
+    } catch (err) {
+        res.status(500).send({ message:"internal server error" })
+    }
+}
+
+const updateProperty = async (req, res) => {
+    try{
+        if(req.headers.authorization){
+          if (req.params.propertyId.length == 24) {
+          let datas = await property.findByIdAndUpdate(req.params.propertyId,{$set:req.body},{new:true})
+            if (datas) {
+                  res.status(200).send({ success:'true',message:'upadate successfully',data: datas });
+              }else{
+                res.status(400).send({ success:'false',message:'failed',data: [] });
+              }       
+          } else {
+            res.status(302).send({ message: "please provide a valid property id" });
+          }
+        }else{
+          res.status(400).send({ message: "unauthorized" });
+        }
+      }catch(err){
+          console.log(err)
+        res.status(500).send("internal server error")
+      }
+}
+
+const deleteProperty = async (req, res) => {
+    try {
+        if (req.params.propertyId.length == 24) {
+            let datas = await property.findByIdAndUpdate(req.params.propertyId,{deleteFlag:true},{returnOriginal:false})
+              if (datas!=null) {
+                    res.status(200).send({ success:'true',message:'delete data successfully',data: datas });
+                }else{
+                  res.status(400).send({ success:'false',message:'failed',data: [] });
+                }       
+            } else {
+              res.status(302).send({ message: "please provide a valid property id" });
+            }
+        }catch(err){
+            console.log(err)
+          res.status(500).send("internal server error")
+        }
+  }
+
+  const selectedPropertyList=(req,res)=>{
     try{        
                 console.log('line99',req.params.typeOfLand)
                     if(req.params.typeOfLand=='residential'){
@@ -124,7 +182,7 @@ const selectedPropertyList=(req,res)=>{
                         })
                     }
     }catch(err){
-        res.status(500).send({message:err.message})}
+        res.status(500).send({message:"internal server error"})}
 }
 
 const sellOrRent=(req,res)=>{
@@ -150,74 +208,9 @@ const sellOrRent=(req,res)=>{
             })
         }
     }catch(err){
-        res.status(500).send({message:err.message})
+        res.status(500).send({message:"internal server error"})
     }
 }
-
-const getSinglePropertyData = async (req, res) => {
-    try {
-        console.log(req.params.id)
-        property.findOne({ _id: req.params.id, deleteFlag: false }, (err, data) => {
-            if (!err)
-                console.log('line 80',data)
-                res.status(200).send({ message: data })
-        })
-
-    } catch (err) {
-        res.status(500).send({ message: err.message })
-    }
-}
-
-const getSellerList = async (req, res) => {
-    try {
-        const superAdminToken=jwt.decode(req.headers.authorization)
-        const id=superAdminToken.userid
-        superadmin.findOne({_id:id,deleteFlag:"false"},(err,datas)=>{
-            if(datas){
-        property.find({role:"seller",deleteFlag:'false'},(err,data)=>{
-            if(err)throw err
-            console.log('line 97',data)
-            res.status(200).send({message:data})
-        }) 
-    }else{res.status(400).send('unauthorized')}
-}) 
-}catch(err){
-    res.status(500).send({message:err.message})
-}
-}
-
-const updateProperty = async (req, res) => {
-    try {
-        console.log('line 106',req.params.id)
-       property.findOne({ _id: req.params.id, deleteFlag:'false'}, (err, datas) => {
-            if (err) throw err
-            property.findOneAndUpdate({_id:req.params.id},req.body, {new:true}, (err, data) => {
-                if(err)throw err
-                res.status(200).send({ message: "Update your property details", data })
-            })
-
-        })
-    } catch (err) {
-        res.status(500).send({ message: err.message })
-    }
-
-}
-
-const deleteProperty = async (req, res) => {
-    try {
-        property.findOne({ _id: req.params.id, deleteFlag: 'false'}, (err, datas) => {
-            if (err) throw err
-            propertyControll.property.findOneAndUpdate({ _id: req.params.id }, { $set: { deleteFlag: "true" } }, { returnOriginal: false }, (err, data) => {
-                if (!err)
-                    res.status(200).send({ message: "Successfully deleted your data" })
-                console.log('line 127',data)
-            })
-        })
-    } catch (err) {
-        res.status(500).send({ message: err.message })
-    }
-}
-
 const dateForRecentlyPost=(req,res)=>{
     try{
         console.log('line 226',req.params.totalNoOfDays)
@@ -256,6 +249,14 @@ const dateForRecentlyPost=(req,res)=>{
 
     
 module.exports = {
-    addProperty, sellerGetOwnPropertyList,getAllPropertyList,selectedPropertyList,getSellerList,
-    getSinglePropertyData,updateProperty, deleteProperty,dateForRecentlyPost,sellOrRent
+    addProperty, 
+    propertyImage,
+    sellerGetOwnPropertyList,
+    getAllPropertyList,
+    getSinglePropertyData,
+    updateProperty, 
+    deleteProperty,
+    selectedPropertyList,
+    dateForRecentlyPost,
+    sellOrRent
 }

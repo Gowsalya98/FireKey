@@ -1,10 +1,10 @@
 const router = require('express').Router()
-const {interestBuyer,getAllInterestList,getSingleBuyerInterestList}= require('./interest_controller')
+const {interestBuyer,getAllInterestBuyerList,getSingleBuyerInterestList}= require('./interest_controller')
 
-router.get('/interestBuyer/:userId/:propertyId', interestBuyer)
+router.post('/create/:propertyId', interestBuyer)
 
-router.get('/getAllInterestList', getAllInterestList)
-router.get('/getSingleBuyerInterestList/:id',getSingleBuyerInterestList)
+router.get('/getAllInterestBuyerList', getAllInterestBuyerList)
+router.get('/getSingleBuyer/:userId',getSingleBuyerInterestList)
 
 
 module.exports = router

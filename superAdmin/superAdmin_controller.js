@@ -1,10 +1,9 @@
 const {superadmin} = require('./superAdmin_models')
-const{property}=require('../propertyDetails/property_model')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
 
-exports.superAdminRegister = async (req, res) => {
+exports.register = async (req, res) => {
     try {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
@@ -25,11 +24,11 @@ exports.superAdminRegister = async (req, res) => {
             })
         }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({ message: 'internal server error' })
     }
 }
 
-exports.superAdminLogin = async (req, res) => {
+exports.login = async (req, res) => {
     try {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
@@ -56,30 +55,10 @@ exports.superAdminLogin = async (req, res) => {
             })
         }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({ message: 'internal server error' })
     }
 }
 
-exports.getAllPropertyList=(req,res)=>{
-    try{
-        const superAdminToken=jwt.decode(req.headers.authorization)
-        const id=superAdminToken.userid
-        superadmin.findOne({_id:id,deleteFlag:"false"},(err,datas)=>{
-            if(datas){
-        property.find({deleteFlag:'false'}, (err, data) => {
-            if(err)throw err
-            console.log(data)
-            res.status(200).send({ message: data })
-    })
-    }else{
-        res.staus(400).send('unauthorized')
-    }
-        })
-    }catch (err) {
-        res.status(500).send({ message: err.message })
-    }
-
-}
 
 
 

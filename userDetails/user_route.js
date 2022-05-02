@@ -1,22 +1,21 @@
 
 const router = require('express').Router()
 
-const {registerForUser,verificationMailForUser,userLogin,forgetPassword,getAllUserList,getSingleUser,updateUserProfile,deleteUserProfile,searchPropertyForBuyer} = require('./user_controller')
-const keeyValidation = require('../middleware/validation')
+const {register,login,forgetPassword,getAllUserList,getSingleUser,
+    updateUserProfile,deleteUserProfile,searchPropertyForBuyer} = require('./user_controller')
 
+const validation = require('../middleware/validation')
 
+router.post('/register', validation.validation,register)
 
-router.post('/register', keeyValidation.validation,registerForUser)
-router.post('/verificationMailForUser/:id/:buyerId',verificationMailForUser)
+router.post('/login', validation.validation,login)
+router.post('/forgetPassword',validation.validation,forgetPassword)
 
-router.post('/login', keeyValidation.validation,userLogin)
-router.post('/forgetPassword',keeyValidation.validation,forgetPassword)
+router.get('/getAllList',getAllUserList)
+router.get('/getSingleDetails/:userId',getSingleUser)
 
-router.get('/getAllUserList',getAllUserList)
-router.get('/getSingleUser/:userId',getSingleUser)
-
-router.put('/updateUserProfile',updateUserProfile)
-router.delete('/deleteUserProfile',deleteUserProfile)
+router.put('/updateProfile/:userId',updateUserProfile)
+router.delete('/deleteProfile/:userId',deleteUserProfile)
 
 router.get('/searchPropertyForBuyer/:key',searchPropertyForBuyer)
 

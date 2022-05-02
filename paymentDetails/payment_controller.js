@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken')
 
 
 exports.getPackagePaymentList = async (req, res) => {
-
     try {
         var listOfInterestSellerData = await interestBuyer.find({}).populate([{ path: 'userData', select: ['userName', 'contact'] },
         { path: 'propertyData', select: ['landDetails','agentOrOwnerName', 'areaLocation'] }])
@@ -119,6 +118,7 @@ exports.getAllPaymentList = async (req, res) => {
     }
 
 }
+
 exports.getSingleSellerPaymentList = async (req, res) => {
     try {
         payment.findById({ _id: req.params.id }, (err, data) => {

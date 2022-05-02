@@ -1,15 +1,13 @@
 
 const router = require('express').Router()
 
-const {superAdminRegister,superAdminLogin,getAllPropertyList} = require('./superAdmin_controller')
+const {register,login} = require('./superAdmin_controller')
 
-const keeyValidation = require('../middleware/validation')
+const validation = require('../middleware/validation')
 
 
-router.post('/superAdminRegister', keeyValidation.validation,superAdminRegister)
-router.post('/superAdminLogin', keeyValidation.validation,superAdminLogin)
-
-router.get('/getAllPropertyList',getAllPropertyList)
+router.post('/register', validation.validation,register)
+router.post('/login',validation.validation,login)
 
 
 module.exports = router

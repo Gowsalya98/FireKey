@@ -2,18 +2,22 @@
 const mongoose=require('mongoose')
 
 const interestBuyerSchema = mongoose.Schema({
-    dateTime: {
-        type: String,
-        default: new Date()
-    },
-    userData:{
+    propertyDetails:{
         type:Object
     },
-    propertyData:{
+    userDetails:{
         type:Object
+    },
+    interest:{
+        type:Boolean,
+        default:false
+    },
+    createdAt:{
+        type:String,
+        default:new Date()
     }
 })
 
-const interestBuyer = mongoose.model('interestBuyer', interestBuyerSchema)
+const interestBuyer = mongoose.model('interestBuyerSchema', interestBuyerSchema)
 
 module.exports = { interestBuyer }
