@@ -1,6 +1,7 @@
 const {interestBuyer} = require('./interest_model')
 const {property} = require('../propertyDetails/property_model')
 const {register}=require('../userDetails/user_model')
+const {transaction}=require('../paymentDetails/payment_model')
 const mongoose=require('mongoose')
 const jwt=require('jsonwebtoken')
 const nodemailer = require('nodemailer')

@@ -66,6 +66,14 @@ const propertySchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
+    swimmingPool:{
+        type:Boolean,
+        default:false
+    },
+    laundry:{
+        type:Boolean,
+        default:false
+    },
     createdAt:{
         type:Date,
         default:new Date()
@@ -84,19 +92,6 @@ const propertySchema = mongoose.Schema({
     },
     
 })
-
-const ratingSchema=mongoose.Schema({
-    deleteFlag:{
-        type:Boolean,
-        default:false
-    },
-    rating:String,
-    createdAt:{
-        type:Date,
-        default:Date.now()
-    }
-})
-
 const propertyImageSchema=mongoose.Schema({
     propertyImage:String,
     deleteFlag:{
@@ -111,13 +106,13 @@ const propertyImageSchema=mongoose.Schema({
 const validation = [
     body('email').trim().isEmail().withMessage('email is required'),
     body('contact').isMobilePhone().withMessage('contact is required'),
-    body('address').isLength({min:1}).withMessage('address is required'),
-    body('propertyName').isAlphanumeric().withMessage('property name is required'),
+    body('Address').isLength({min:1}).withMessage('Address is required'),
+    //body('landDetails.propertyName').isAlphanumeric().withMessage('propertyName is required'),
     body('city').isString().withMessage('city is required')
 ]
 
 const property=mongoose.model('propertySchema',propertySchema)
 const image=mongoose.model('propertyImageSchema',propertyImageSchema)
-const rating=mongoose.model('ratingSchema',ratingSchema)
 
-module.exports = { property,image,rating,validation}
+
+module.exports = { property,image,validation}

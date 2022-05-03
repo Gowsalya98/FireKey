@@ -19,7 +19,7 @@ const registerSchema = mongoose.Schema({
     createdAt:{
         type:String
     },
-    orderId:{
+    paymentId:{
         type:String,
         default:'0'
     },

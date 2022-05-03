@@ -1,14 +1,14 @@
 
 const router = require('express').Router()
 
-const {getPackagePaymentList,createOrderId,getAllPaymentList,getSingleSellerPaymentList,paymentDetails} = require('./payment_controller')
-
-router.get('/getPackagePaymentList', getPackagePaymentList)
+const {createOrderId,viewPackageAndPaidPaymentForPropertyOwner,getAllPaymentList,getSinglePaymentDetails} = require('./payment_controller')
 
 router.post('/createOrderId',createOrderId)
-router.post('/paymentDetails', paymentDetails)
+
+router.post('/paymentDetails/:ownerId',viewPackageAndPaidPaymentForPropertyOwner )
 
 router.get('/getAllPaymentList', getAllPaymentList)
-router.get('/getSingleSellerPaymentList/:id', getSingleSellerPaymentList)
+
+router.get('/getSinglePaymentDetails/:transactionId',getSinglePaymentDetails )
 
 module.exports = router

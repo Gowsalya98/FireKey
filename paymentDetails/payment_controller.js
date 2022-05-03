@@ -1,62 +1,11 @@
 
-const {payment} = require('./payment_model')
-const{property} = require('../propertyDetails/property_model')
-const {interestBuyer} = require('../interestBuyer/interest_model')
+const {payment,transaction} = require('./payment_model')
+const{register}=require('../userDetails/user_model')
+const mongoose=require('mongoose')
+const moment=require('moment')
 const razorpay=require('razorpay')
 const jwt = require('jsonwebtoken')
 
-
-exports.getPackagePaymentList = async (req, res) => {
-    try {
-        var listOfInterestSellerData = await interestBuyer.find({}).populate([{ path: 'userData', select: ['userName', 'contact'] },
-        { path: 'propertyData', select: ['landDetails','agentOrOwnerName', 'areaLocation'] }])
-
-        payment.find({ paymentId: req.body.paymentId }, (err, data) => {
-            console.log(data)
-            if (data != null) {
-                console.log(data[0].amount)
-                var pay = 5 / 100 * parseInt(data[0].amount)
-                console.log('pay', pay)
-
-                var interest = listOfInterestSellerData.length;
-                console.log('interestBuyer', interest)
-                // console.log(typeof(pay))
-                // console.log(typeof(interest))
-                const rate = interest - pay
-                console.log(rate)
-                //interest 20
-                // pay 30
-                //show = listOfInterestSellerData.slice(0,pay + 5)
-                if (pay >= interest) {
-                    console.log("line 27", listOfInterestSellerData)
-                    res.status(200).send({ message: " line 33 Package", listOfInterestSellerData })
-                    // interest 15
-                    // pay 10    
-                    // difference 5 small show all
-                } else if (pay < interest && rate < 5) {
-                    res.status(200).send({ message: "line 38 Package", listOfInterestSellerData })
-                    //interest 20
-                    // pay 30
-                    //show = listOfInterestSellerData.slice(0,pay + 5)
-                } else if (pay < interest && rate >= 5) {
-                    show = listOfInterestSellerData.slice(0, pay + 5)
-                    res.status(200).send({ message: " line 44 Package", show })
-                }
-            }
-            else {
-                if (listOfInterestSellerData.length >= 5) {
-                    show = listOfInterestSellerData.slice(0, 5)
-                    res.status(400).send({ message: "FreePackage", show })
-                }else{
-                    res.status(200).send({message:"FreePackage",listOfInterestSellerData})
-                }
-                res.status(400).send({ message: "data not found" })
-            }
-        })
-    } catch (err) {
-        res.status(500).send({ message: err.message })
-    }
-}
 
 exports.createOrderId=async(req,res)=>{
 
@@ -71,63 +20,125 @@ exports.createOrderId=async(req,res)=>{
     receipt: "order_rcptid_11"
   };
   instance.orders.create(options, function(err, order) {
-    console.log(order);
-    res.send(order)
+    if(err){
+        res.status(400).send({success:'false',message:'failed'})
+    }else{
+        req.body.paymentId = order.id
+      payment.create(req.body, (err, data) => {
+        if (err) { res.status(400).send({ success: 'false', message: 'failed'}) }
+        else { res.status(200).send({ success: 'true', message: 'successfully generated orderId', data }) }
+      })
+    }
   });
 }
 
-exports.paymentDetails =  (req, res) => {
+exports.viewPackageAndPaidPaymentForPropertyOwner = async (req, res) => {
     try {
-        const unique = makeid(5)
-        const date = Date.now().toString()
-        req.body.paymentId = unique + date
-        console.log(req.body.paymentId)
-        req.body.paymentOn=new Date().toLocaleString()
-                payment.create(req.body,(err,data)=>{
-                    if(err){throw err}
-                    else{
-                        console.log('line 14',data)
-                        res.status(200).send({message:"successfully payed",data})
-                    }
-                })
-    } catch (err) {
-        res.status(500).send({ message: err.message })
+        const alreadyExists=await transaction.aggregate([{$match:{"ownerId":req.params.ownerId}}])
+        if(alreadyExists.length!=0){
+    
+          const ownerData=await register.aggregate([{$match:{"_id":new mongoose.Types.ObjectId(req.params.ownerId)}}])
+          
+          const oldDate=new Date(ownerData[0].subscriptionEndDate)
+          const currentDate=new Date()
+          const differInDays=moment(oldDate).diff(moment(currentDate),'days')
+    
+          if(req.body.subscriptionPlan=='1 month'){
+           
+            req.body.validityDays=30+differInDays
+            req.body.subscriptionEndDate=moment(new Date()).add(30+differInDays,'days').toISOString()
+              }
+          if(req.body.subscriptionPlan=='3 month'){
+            req.body.validityDays=60+differInDays
+            req.body.subscriptionEndDate=moment(new Date()).add(90+differInDays,'days').toISOString()
+              }
+          if(req.body.subscriptionPlan=='6 month'){
+              req.body.validityDays=180+differInDays
+              req.body.subscriptionEndDate=moment(new Date()).add(180+differInDays,'days').toISOString()
+              }
+          if(req.body.subscriptionPlan=='1 year'){
+                req.body.validityDays=360+differInDays
+                req.body.subscriptionEndDate=moment(new Date()).add(360+differInDays,'days').toISOString()
+              }
+              req.body.ownerId=req.params.ownerId
+              const createPaymentAgain=await transaction.create(req.body)
+    
+        } 
+    
+        else{
+            req.body.ownerId=req.params.ownerId
+          const paymentCreated=await transaction.create(req.body)
+          console.log('line 73',paymentCreated)
+    
+          if(paymentCreated.subscriptionPlan=='1 month'){
+            req.body.subscriptionEndDate=moment(paymentCreated.createdAt).add(30,'days').toISOString()
+            console.log('line 77',req.body.subscriptionEndDate)
+            req.body.validityDays=30
+              }
+    
+          if(paymentCreated.subscriptionPlan=='3 month'){
+            req.body.subscriptionEndDate=moment(paymentCreated.createdAt).add(90,'days').toISOString()
+            req.body.validityDays=60
+              }
+    
+          if(paymentCreated.subscriptionPlan=='6 month'){
+              req.body.subscriptionEndDate=moment(paymentCreated.createdAt).add(180,'days').toISOString()
+            req.body.validityDays=180
+              }
+    
+          if(paymentCreated.subscriptionPlan=='1 year'){
+              req.body.subscriptionEndDate=moment(paymentCreated.createdAt).add(360,'days').toISOString()
+                req.body.validityDays=360
+              }
+              
+            req.body.subscriptionStartDate=paymentCreated.createdAt
+            req.body.paymentId=paymentCreated.paymentId
+            req.body.paymentStatus='paid'
+        
+      }
+    
+        const userUpdate = await register.findByIdAndUpdate(req.params.ownerId, req.body, { new: true })
+    
+        res.status(200).send({success:'true',message:'payment created successfully'})
+    
+      } catch(err){
+        res.status(500).send({message:'internal server error'})
+    
+      } 
+           
     }
-}
 
-function makeid(length) {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() *
-            charactersLength));
-    }
-    return result;
-}
 
 exports.getAllPaymentList = async (req, res) => {
     try {
-        payment.find({},(err,data)=>{
-            if(err)throw err
-            console.log('line 96',data)
-            res.status(200).send(data)
-        })
+       const adminToken=jwt.decode(req.headers.authorization)
+       if(adminToken!=undefined){
+            const data=await transaction.find({})
+            data.sort().reverse()
+            res.status(200).send({success:'true',message:'All payment list',data})
+       }else{
+           res.status(400).send({success:'false',message:'unauthorized',data:[]})
+       }
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send({ message:'internal server error'})
     }
 
 }
 
-exports.getSingleSellerPaymentList = async (req, res) => {
+exports.getSinglePaymentDetails = async (req, res) => {
     try {
-        payment.findById({ _id: req.params.id }, (err, data) => {
-            if (err) throw err
-            console.log('line 108',data)
-            res.status(200).send(data)       
-        })
+       if(req.params.transactionId.length==24){
+    const data=await transaction.aggregate([{$match:{"_id":new mongoose.Types.ObjectId(req.params.transactionId)}}])
+        if(data!=null){
+            res.status(200).send({success:'true',message:'your data',data:data})
+        }else{
+            res.status(302).send({success:'false',message:'failed',data:[]})
+        }
+       }
+       //res.status(400).send({success:'false',message:'please provide valid id'})    
     } catch (err) {
-        res.status(500).send({ message: err.message })
+      console.log(err);
+        res.status(500).send({ message: 'internal server error' })
     }
 }
 

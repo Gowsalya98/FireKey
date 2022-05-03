@@ -12,7 +12,7 @@ const user=require('./userDetails/user_route')
 const property=require('./propertyDetails/property_route')
 const interestBuyer=require('./interestBuyer/interest_route')
 const payment=require('./paymentDetails/payment_route')
-const report=require('./report/report_route')
+const problemAndSuggestion=require('./prob_sugg_ques-fb/prob_sugg_ques_fb_route')
 
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
@@ -25,7 +25,7 @@ app.use('/user',user)
 app.use('/property',property)
 app.use('/user/interest',interestBuyer)
 app.use('/payment',payment)
-app.use('/admin/report',report)
+app.use('/admin/problemAndSuggestion',problemAndSuggestion)
 
 app.get('/',(req,res)=>{
     res.send('welcome FireKey')

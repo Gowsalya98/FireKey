@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const propertyController = require('./addProperty_controller')
+const validation=require('./property_model')
 const multer = require('../middleware/multer')
 
-router.post('/addProperty', propertyController.addProperty)
+router.post('/addProperty',validation.validation, propertyController.addProperty)
 
 router.post('/propertyImage',multer.upload.single('propertyImage'),propertyController.propertyImage)
 

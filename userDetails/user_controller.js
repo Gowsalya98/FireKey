@@ -59,7 +59,7 @@ exports.forgetPassword=(req,res)=>{
                 console.log("line 76", datas)
                 if (datas) {
                     const userToken = jwt.decode(req.headers.authorization)
-                    const decodeId = userToken.userid
+                    const decodeId = userToken.id
                     register.findOne({ _id: decodeId }, async (err, data) => {
                         console.log("line 81", data)
                         if (data) {
@@ -85,7 +85,7 @@ exports.forgetPassword=(req,res)=>{
             })
         } else {
             const userToken = jwt.decode(req.headers.authorization)
-            const decodeId = userToken.userid
+            const decodeId = userToken.id
             register.findById({ _id: decodeId },async (err, data) => {
                 console.log("line 108", data)
                 if (data) {
