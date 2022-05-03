@@ -5,7 +5,7 @@ router.post('/createProbAndSuggAndQuesAndFb',problemControl.createProbAndSuggAnd
 
 router.get('/getAllProbAndSuggAndQuesAndFbList',problemControl.getAllProbAndSuggAndQuesAndFbList)
 
-router.get('/getSingleProbAndSuggAndQuesAndFbList/:problemAndSuggestionId',problemControl.getSingleProbAndSuggAndQuesAndFbList)
+router.get('/getSingleProbAndSuggAndQuesAndFb/:problemAndSuggestionId',problemControl.getSingleProbAndSuggAndQuesAndFbList)
 
 
 module.exports = router

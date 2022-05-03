@@ -18,7 +18,7 @@ exports.createProbAndSuggAndQuesAndFb = async (req, res) => {
 exports.getAllProbAndSuggAndQuesAndFbList = async(req, res) => {
     try {
         if(req.headers.authorization){
-        const data=await problemAndSuggestion.aggregate([{$match:{"deleteFlag":false}}])
+        const data=await problemAndSuggestion.find({})
             if(data!=null){
                 data.sort().reverse()
                 res.status(200).send({ success:'true',message: "All data list", data:data })
