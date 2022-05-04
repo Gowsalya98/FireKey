@@ -90,5 +90,23 @@ const getPackageDetails=async(req,res)=>{
     }
 }
 
+const deletePackageDetails=async(req,res)=>{
+    try{
+    if(req.params.packageId.length==24){
+        const data=await package.findOneAndUpdate({_id:req.params.packageId},{deleteFlag:'true'},{returnOriginal:false})
+        if(data){
+            res.status(200).send({success:'true',message:'successfully delete your package',data:data})
+        }else{
+            res.status(400).send({success:'false',message:'something wrong,data not found',data:[]})
+        }
+    }else{
+        res.status(400).send({success:'false',message:'invalid id'})
+    }
+    
+}catch(err){
+    res.status(500).send({message:'internal server error'})
 
-module.exports={register,login,createPackageForSuperAdmin,getPackageDetails}
+}
+}
+
+module.exports={register,login,createPackageForSuperAdmin,getPackageDetails,deletePackageDetails}

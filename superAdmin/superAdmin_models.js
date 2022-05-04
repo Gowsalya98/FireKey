@@ -29,8 +29,21 @@ const packageSchema=mongoose.Schema({
     
 })
 
-const package=mongoose.model('packageSchema',packageSchema)
+const contactUsSchema=mongoose.Schema({
+    userName:String,
+    email:String,
+    phoneNumber:Number,
+    message:String,
+    createdAt:{
+        type:Date,
+        default:new Date()
+    }
+})
 
 const superadmin = mongoose.model("superAdminSchema", superAdminSchema)
 
-module.exports = { superadmin,package }
+const package=mongoose.model('packageSchema',packageSchema)
+
+const contactForAdmin=mongoose.model('contactUsSchema',contactUsSchema)
+
+module.exports = { superadmin,package,contactForAdmin}

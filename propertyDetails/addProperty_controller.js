@@ -150,62 +150,59 @@ const deleteProperty = async (req, res) => {
         }
   }
 
-  const selectedPropertyList=(req,res)=>{
+  const propertyTypeFilter=async(req,res)=>{
     try{        
-                console.log('line99',req.params.typeOfLand)
-                    if(req.params.typeOfLand=='residential'){
-                        property.find({typeOfLand:req.params.typeOfLand,deleteFlag:'false'},(err,data)=>{
+                console.log('line99',req.params.propertyType)
+                    if(req.params.propertyType=='residential'){
+                      const data=await property.aggregate([{$match:{$and:[{"propertyType":req.params.propertyType},{"deleteFlag":false}]}}])
                             if(data){
-                                console.log('line 103',data)
-                                res.status(200).send(data)
+                                res.status(200).send({success:'true',message:'your property list',data:data})
                                 }else{
-                                    res.status(400).send('data not found')
+                                    res.status(400).send({success:'false',message:'data not found',data:[]})
                                 }
-                        })
-                    }else if(req.params.typeOfLand=='commerical'){
-                        property.find({typeOfLand:req.params.typeOfLand,deleteFlag:'false'},(err,data)=>{
-                            if(data){
-                            console.log('line 112',data)
-                            res.status(200).send(data)
-                            }else{
-                                res.status(400).send('data not found')
-                            }
-                        })
+                    }else if(req.params.propertyType=='commerical'){
+                      const data=await property.aggregate([{$match:{$and:[{"propertyType":req.params.propertyType},{"deleteFlag":false}]}}])
+                      if(data){
+                          res.status(200).send({success:'true',message:'your property list',data:data})
+                          }else{
+                              res.status(400).send({success:'false',message:'data not found',data:[]})
+                          }
                     }else{
-                        property.find({typeOfLand:req.params.typeOfLand,deleteFlag:'false'},(err,data)=>{
-                            if(data){
-                                console.log('line 121',data)
-                                res.status(200).send(data)
-                                }else{
-                                    res.status(400).send('data not found')
-                                }
-                        })
-                    }
+                      const data=await property.aggregate([{$match:{$and:[{"propertyType":req.params.propertyType},{"deleteFlag":false}]}}])
+                      if(data){
+                          res.status(200).send({success:'true',message:'your property list',data:data})
+                          }else{
+                              res.status(400).send({success:'false',message:'data not found',data:[]})
+                          }
+                        }
     }catch(err){
         res.status(500).send({message:"internal server error"})}
 }
 
-const sellOrRent=(req,res)=>{
+const propertyStatusFilter=async(req,res)=>{
     try{
-        console.log('line 143',req.params.sellOrRentOrLease)
-        if(req.params.sellOrRentOrLease=='sell'){
-            property.find({sellOrRentOrLease:req.params.sellOrRentOrLease,deleteFlag:'false'},(err,data)=>{
-                if(err)throw err
-                console.log('line 152',data)
-                res.status(200).send(data)
-            })
-        }else if(req.params.sellOrRentOrLease=='rent'){
-            property.find({sellOrRentOrLease:req.params.sellOrRentOrLease,deleteFlag:'false'},(err,data)=>{
-                if(err)throw err
-                console.log('line 158',data)
-                res.status(200).send(data)
-            })
+        console.log('line 143',req.params.propertyStatus)
+        if(req.params.propertyStatus=='sell'){
+          const data=await property.aggregate([{$match:{$and:[{"propertyStatus":req.params.propertyStatus},{"deleteFlag":false}]}}])
+          if(data){
+              res.status(200).send({success:'true',message:'your property list',data:data})
+              }else{
+                  res.status(400).send({success:'false',message:'data not found',data:[]})
+              }
+        }else if(req.params.propertyStatus=='rent'){
+          const data=await property.aggregate([{$match:{$and:[{"propertyStatus":req.params.propertyStatus},{"deleteFlag":false}]}}])
+          if(data){
+              res.status(200).send({success:'true',message:'your property list',data:data})
+              }else{
+                  res.status(400).send({success:'false',message:'data not found',data:[]})
+              }
         }else{
-            property.find({sellOrRentOrLease:req.params.sellOrRentOrLease,deleteFlag:'false'},(err,data)=>{
-                if(err)throw err
-                console.log('line 164',data)
-                res.status(200).send(data)
-            })
+          const data=await property.aggregate([{$match:{$and:[{"propertyStatus":req.params.propertyStatus},{"deleteFlag":false}]}}])
+          if(data){
+              res.status(200).send({success:'true',message:'your property list',data:data})
+              }else{
+                  res.status(400).send({success:'false',message:'data not found',data:[]})
+              }
         }
     }catch(err){
         res.status(500).send({message:"internal server error"})
@@ -256,7 +253,7 @@ module.exports = {
     getSinglePropertyData,
     updateProperty, 
     deleteProperty,
-    selectedPropertyList,
+    propertyTypeFilter,
+    propertyStatusFilter,
     dateForRecentlyPost,
-    sellOrRent
 }

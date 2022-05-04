@@ -32,7 +32,7 @@ const transactionSchema=mongoose.Schema({
         default:'0'
     },
     validityDays:{
-        type:String,
+        type:Number,
         default:'0'
     }
 

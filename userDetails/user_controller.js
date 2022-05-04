@@ -210,35 +210,11 @@ exports.deleteUserProfile = async (req, res) => {
 }
 
 exports.searchPropertyForBuyer = async (req, res) => {
-    console.log(req.params.key)
-    try {
-        if (req.body.typeOfLand == 'residential') {
-            const data = await property.find({
-                "$or":
-                    [{ "landDetails.prize": { $regex: req.params.key } },
-                    { "areaLocation": { $regex: req.params.key } }
-                    ]
-            })
-            res.status(200).send({ message: "search done", data })
-        } else if (req.body.typeOfLand == 'commercial') {
-            const data = await property.find({
-                "$or": [
-                    { "landDetails.prize": { $regex: req.params.key } },
-                    { "areaLocation": { $regex: req.params.key } }
-                ]
-            })
-            res.status(200).send({ message: "search done", data })
-        } else {
-            const data = await property.find({
-                "$or": [
-                    { "landDetails.prize": { $regex: req.params.key } },
-                    { "areaLocation": { $regex: req.params.key } }
-                ]
-            })
-            res.status(200).send({ message: "search done", data })
-        }
+   try{
+       const data=await property.aggregate([{$match:{$and:[{"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},
+       {"nearBySchool":req.body.nearBySchool}]}}])
     } catch (err) {
-        res.status(500).send({ message: err.message })
+        res.status(500).send(res.status(500).send({ message: "internal server error" }))
     }
 
 }

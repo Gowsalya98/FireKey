@@ -42,7 +42,7 @@ const propertySchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
-    parking:{
+    parkking:{
         type:Boolean,
         default:false
     },

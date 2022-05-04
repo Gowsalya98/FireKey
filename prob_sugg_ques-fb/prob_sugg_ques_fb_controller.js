@@ -36,7 +36,7 @@ exports.getAllProbAndSuggAndQuesAndFbList = async(req, res) => {
 
 exports.getSingleProbAndSuggAndQuesAndFbList=async(req,res)=>{
     try{
-        if(req.params.problemAndSuggestionId==24){
+        if(req.params.problemAndSuggestionId.length==24){
             const data=await problemAndSuggestion.aggregate([{$match:{"_id":new mongoose.Types.ObjectId(req.params.problemAndSuggestionId)}}])
             if(data){
                 res.status(200).send({ success:'true',message: "your data", data:data })

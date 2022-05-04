@@ -18,8 +18,10 @@ router.put('/updateProperty/:propertyId', propertyController.updateProperty)
 router.delete('/deleteProperty/:propertyId', propertyController.deleteProperty)
 
 //filter
-router.get('/selectedPropertyList/:typeOfLand',propertyController.selectedPropertyList)
+router.get('/propertyTypeFilter/:propertyType',propertyController.propertyTypeFilter)
+
 router.get('/recentPost/:totalNoOfDays',propertyController.dateForRecentlyPost)
-router.get('/sellorRentOrLease/:sellOrRentOrLease',propertyController.sellOrRent)
+
+router.get('/propertyStatusFilter/:propertyStatus',propertyController.propertyStatusFilter)
 
 module.exports = router
