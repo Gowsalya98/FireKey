@@ -211,10 +211,34 @@ exports.deleteUserProfile = async (req, res) => {
 
 exports.searchPropertyForBuyer = async (req, res) => {
    try{
-       const data=await property.aggregate([{$match:{$and:[{"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},
-       {"nearBySchool":req.body.nearBySchool}]}}])
+    //    console.log('line 214',(typeof(req.body.nearBySchool)));
+    console.log('line 215',req.body);
+       const data=await property.aggregate([{$match:{$and:[{"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},{"city":req.body.city},
+      // {"nearBySchool":req.body.nearBySchool},{"nearByPark":req.body.nearByPark},{"nearByHospital":req.body.nearByHospital},
+       {"landDetails.minSquareFt":req.body.minSquareFt},{"landDetails.maxSquareFt":req.body.maxSquareFt},
+       {"landDetails.minBeds":req.body.minBeds},{"landDetails.minBaths":req.body.minBaths}]}}])
+       console.log('line 219',data);
+      
+      var result=getKeyByValue(data,"500sqft");
+      console.log('line 223',result);
+       if(result){ 
+       res.status(200).send({success:'true',message:'fetch your data',data:result})
+       }else{
+        res.status(400).send({success:'false',message:'data not found',data:[]})  
+       }
     } catch (err) {
+        console.log(err);
         res.status(500).send(res.status(500).send({ message: "internal server error" }))
     }
 
 }
+function getKeyByValue(data, value) {
+        var s= Object.keys(data).find((key) =>{
+            
+            console.log(key);
+            console.log(Object.keys(data)[key]);
+            console.log(value);
+            data[key] === value});
+        console.log("s:",s);
+        return s
+      }

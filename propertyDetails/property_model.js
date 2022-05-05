@@ -4,9 +4,13 @@ const {body,validationResult}=require('express-validator')
 
 const Residential_Commercial_Land_Schema = mongoose.Schema({
     propertyName: String,
-    configuration: {
-        type: String,
+    minBeds: {
+        type: Number,
         default: " "
+    },
+    minBaths:{
+        type:Number,
+        default:""
     },
     plotNo:{
         type:String,
@@ -74,6 +78,7 @@ const propertySchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
+    discount:String,
     createdAt:{
         type:Date,
         default:new Date()

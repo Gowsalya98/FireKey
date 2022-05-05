@@ -17,6 +17,6 @@ router.get('/getSingleDetails/:userId',getSingleUser)
 router.put('/updateProfile/:userId',updateUserProfile)
 router.delete('/deleteProfile/:userId',deleteUserProfile)
 
-router.get('/searchPropertyForBuyer/:key',searchPropertyForBuyer)
+router.get('/searchPropertyForBuyer',searchPropertyForBuyer)
 
 module.exports = router
