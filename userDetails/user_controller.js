@@ -213,8 +213,9 @@ exports.searchPropertyForBuyer = async (req, res) => {
    try{
     //    console.log('line 214',(typeof(req.body.nearBySchool)));
     console.log('line 215',req.body);
+
        const data=await property.aggregate([{$match:{$and:[{"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},{"city":req.body.city},
-      // {"nearBySchool":req.body.nearBySchool},{"nearByPark":req.body.nearByPark},{"nearByHospital":req.body.nearByHospital},
+      {"nearBySchool":req.body.nearBySchool},{"nearByPark":req.body.nearByPark},{"nearByHospital":req.body.nearByHospital},
        {"landDetails.minSquareFt":req.body.minSquareFt},{"landDetails.maxSquareFt":req.body.maxSquareFt},
        {"landDetails.minBeds":req.body.minBeds},{"landDetails.minBaths":req.body.minBaths}]}}])
        console.log('line 219',data);
