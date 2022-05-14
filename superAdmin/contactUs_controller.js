@@ -1,5 +1,5 @@
 const {contactForAdmin} = require('./superAdmin_models')
-const {register}=require('../userDetails/user_model')
+//const {register}=require('../userDetails/user_model')
 
 const mongoose=require('mongoose')
 

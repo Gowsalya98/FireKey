@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const { body, validationResult } = require('express-validator')
+
 
 const registerSchema = mongoose.Schema({
     userName: String,
@@ -44,7 +46,12 @@ const otp = mongoose.Schema({
     otp: Number
 })
 
+const validation = [
+    body('email').isEmail().withMessage('Email must be Valid'),
+    body('password').isLength({ min: '5', max: '10' }).withMessage('Password must be 5 Character')
+]
+
 const register = mongoose.model("registerSchema", registerSchema)
 const otpSchema =mongoose.model('otp',otp)
 
-module.exports = { register,otpSchema }
+module.exports = { register,otpSchema,validation }

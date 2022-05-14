@@ -212,34 +212,86 @@ exports.deleteUserProfile = async (req, res) => {
 exports.searchPropertyForBuyer = async (req, res) => {
    try{
     //    console.log('line 214',(typeof(req.body.nearBySchool)));
-    console.log('line 215',req.body);
 
-       const data=await property.aggregate([{$match:{$and:[{"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},{"city":req.body.city},
-      {"nearBySchool":req.body.nearBySchool},{"nearByPark":req.body.nearByPark},{"nearByHospital":req.body.nearByHospital},
-       {"landDetails.minSquareFt":req.body.minSquareFt},{"landDetails.maxSquareFt":req.body.maxSquareFt},
-       {"landDetails.minBeds":req.body.minBeds},{"landDetails.minBaths":req.body.minBaths}]}}])
-       console.log('line 219',data);
+    var k = Object.keys(req.body)
+    console.log(k);
+    console.log('line 215',req.body);
+    var matches = {};
+    var mm = [];
+   var kk = [];
+   var ll = []
+
+    // matches['topLevelFilter.id'] = { $in: ['5fd1bd7868d7ac4e211a7642'] };
+    // matches['ruleCategory'] = {  $nin: ['', null] };
+     Object.entries(req.body).map((fe)=>{
+        matches[fe[0]] =  fe[1]
+        mm.push({[fe[0].toString()] :  fe[1]})
+                // kk.push(",")
+    })
+    console.log('line 231',matches);
+
+    // for(var i = 0 ; i < mm.length ; i++){
+    //         ll.push(mm[i] + kk[i])
+    // }
+
+    console.log('line 237',mm);
+var xx = {...mm};
+
+console.log(xx);
+var  ff =  xx[0];
+var gg = xx[1];
+
+var oo = ff,gg;
+console.log(oo);
+
+var ww = (Object.values({...xx}));
+console.log("dsfdsfsf",...ww);
+//     matches.toArray().map((h)=>{
+// mm.push(h)
+//     });
+// var obj = {};
+// obj = {...mm}
+// console.log("233",obj)
+
+    // console.log(JSON.parse(JSON.stringify(mm.join(","))));
+    // req.body.map((ma)=>{
+    //     matches[ma] = {$in : []}
+    // });
+
+
+       const data=await property.aggregate([
+        { $match: {$and:[Object.entries({...xx})]}}
+    //        {$match:{$and:[
+    //        {"propertyType":req.body.propertyType},{"propertyStatus":req.body.propertyStatus},{"city":req.body.city},
+    //   {"nearBySchool":req.body.nearBySchool},
+    //    {"landDetails.minSquareFt":req.body.minSquareFt},{"landDetails.maxSquareFt":req.body.maxSquareFt},
+    //    {"landDetails.minBeds":req.body.minBeds},{"landDetails.minBaths":req.body.minBaths}]
+    // }}
+     ])
+       console.log('line 260',data );
       
-      var result=getKeyByValue(data,"500sqft");
-      console.log('line 223',result);
-       if(result){ 
-       res.status(200).send({success:'true',message:'fetch your data',data:result})
-       }else{
-        res.status(400).send({success:'false',message:'data not found',data:[]})  
-       }
+    //   var result=getKeyByValue(data,"500sqft");
+    //   console.log('line 223',result);
+    //    if(result){ 
+     res.status(200).send({success:'true',message:'fetch your data',data:data})
+    //    }else{
+    //     res.status(400).send({success:'false',message:'data not found',data:[]})  
+    //    }
+
+    //    console.log('234');
     } catch (err) {
         console.log(err);
         res.status(500).send(res.status(500).send({ message: "internal server error" }))
     }
 
 }
-function getKeyByValue(data, value) {
-        var s= Object.keys(data).find((key) =>{
+// function getKeyByValue(data, value) {
+//         var s= Object.keys(data).find((key) =>{
             
-            console.log(key);
-            console.log(Object.keys(data)[key]);
-            console.log(value);
-            data[key] === value});
-        console.log("s:",s);
-        return s
-      }
+//             console.log(key);
+//             console.log(Object.keys(data)[key]);
+//             console.log(value);
+//             data[key] === value});
+//         console.log("s:",s);
+//         return s
+//       }

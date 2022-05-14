@@ -112,7 +112,8 @@ const getSinglePropertyData = async (req, res) => {
 
 const updateProperty = async (req, res) => {
     try{
-        if(req.headers.authorization){
+      const adminToken=jwt.decode(req.headers.authorization)
+        if(adminToken!=undefined){
           if (req.params.propertyId.length == 24) {
           let datas = await property.findByIdAndUpdate(req.params.propertyId,{$set:req.body},{new:true})
             if (datas) {

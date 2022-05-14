@@ -1,6 +1,6 @@
 
 const router = require('express').Router()
-
+const valid=require('../userDetails/user_model')
 const {register,login,forgetPassword,getAllUserList,getSingleUser,
     updateUserProfile,deleteUserProfile,searchPropertyForBuyer} = require('./user_controller')
 
@@ -8,7 +8,7 @@ const validation = require('../middleware/validation')
 
 router.post('/register', validation.validation,register)
 
-router.post('/login', validation.validation,login)
+router.post('/login', valid.validation,login)
 router.post('/forgetPassword',validation.validation,forgetPassword)
 
 router.get('/getAllList',getAllUserList)

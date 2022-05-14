@@ -7,9 +7,11 @@ const contactControl=require('./contactUs_controller')
 
 const validation = require('../middleware/validation')
 
+const valid=require('../userDetails/user_model')
+
 router.post('/register', validation.validation,superControl.register)
 
-router.post('/login',validation.validation,superControl.login)
+router.post('/login',valid.validation,superControl.login)
 
 router.post('/createPackageForSuperAdmin',superControl.createPackageForSuperAdmin)
 

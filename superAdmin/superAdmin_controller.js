@@ -18,6 +18,7 @@ const register = async (req, res) => {
                         if (err){
                             res.status(400).send({ success:'false',message:"failed"})
                         }else{
+                            console.log('line 22',data);
                         res.status(200).send({ message: "Successfully Registered", data })
                         }
                     })
@@ -26,30 +27,34 @@ const register = async (req, res) => {
                 }
         }
     } catch (err) {
+        console.log(err);
         res.status(500).send({ message: 'internal server error' })
     }
 }
 
-const login = async (req, res) => {
+const login =(req, res) => {
     try {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {
             return res.status(400).send({ errors: errors.array() })
         } else {
-          const data=await superadmin.findOne({email:req.body.email})
-                if (data) {
-                    const password = await bcrypt.compare(req.body.password, data.password)
-                    if (password == true) {
-                        const userid = data._id
-                        const token = jwt.sign({ userid }, 'secretKey')
-                        res.status(200).send({success:'true',message: "Login Successfully", token,data:data})
-                    } else {
-                        res.status(400).send({success:'false',message: "Incorrect Password" })
-                    }
-
+          superadmin.findOne({email:req.body.email},async(err,data)=>{
+            console.log('line 43',data);
+            if (data) {
+                const password = await bcrypt.compare(req.body.password, data.password)
+                if (password == true) {
+                    const userid = data._id
+                    const token = jwt.sign({ userid }, 'secretKey')
+                    console.log('line 48',data);
+                    res.status(200).send({success:'true',message: "Login Successfully", token,data:data})
                 } else {
-                    res.status(400).send({ success:'false',message: "invaild email" })
+                    res.status(400).send({success:'false',message: "Incorrect Password" })
                 }
+
+            } else {
+                res.status(400).send({ success:'false',message: "invaild email" })
+            }
+          })     
         }
     } catch (err) {
         res.status(500).send({ message: 'internal server error' })

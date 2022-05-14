@@ -4,6 +4,7 @@ const superAdminSchema = mongoose.Schema({
     userName: String,
     email: String,
     password: String,
+    contact:Number,
     role: {
         type: String,
         default: "superadmin"
