@@ -58,7 +58,7 @@ const propertySchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    nearByGrounds:{
+    nearByPlayGrounds:{
         type:Boolean,
         default:false
     },
@@ -66,15 +66,11 @@ const propertySchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    nearByTransport:{
+    nearByBusStop:{
         type:Boolean,
         default:false
     },
     swimmingPool:{
-        type:Boolean,
-        default:false
-    },
-    laundry:{
         type:Boolean,
         default:false
     },
