@@ -4,24 +4,17 @@ const {body,validationResult}=require('express-validator')
 
 const Residential_Commercial_Land_Schema = mongoose.Schema({
     propertyName: String,
-    minBeds: {
-        type: Number,
-        default: " "
-    },
-    minBaths:{
-        type:Number,
-        default:""
-    },
+    BHK:String,
     plotNo:{
         type:String,
         default:""
     },
-    minSquareFt: String,
-    maxSquareFt:String,
+    squareFt:String,
     price: String
 })
 const propertySchema = mongoose.Schema({
-    agentOrOwnerName: String,
+    contactPerson: String,
+    ownerShip: String,
     email: String,
     contact: Number,
     propertyType: String,
@@ -34,8 +27,8 @@ const propertySchema = mongoose.Schema({
     },
     Address:String,
     city: String,
+    pincode:Number,
     propertyImage: String,
-    ownerShip: String,
     label:String,
     description: String,
     storage: {
@@ -84,8 +77,8 @@ const propertySchema = mongoose.Schema({
         default:false
     },
     rating:{
-        type:String,
-        default:'0'
+        type:Number,
+        default:0
     },
     packageStatus:{
         type:String,
