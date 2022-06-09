@@ -17,7 +17,7 @@ exports.createOrderId=async(req,res)=>{
   var options = {
     amount: 100,  // amount in the smallest currency unit
     currency: "INR",
-    receipt: "order_rcptid_11"
+    receipt: "order_rcptid_11"  
   };
   instance.orders.create(options, function(err, order) {
     if(err){
@@ -49,7 +49,7 @@ exports.viewPackageAndPaidPaymentForPropertyOwner = async (req, res) => {
             req.body.subscriptionEndDate=moment(new Date()).add(30+differInDays,'days').toISOString()
               }
           if(req.body.subscriptionPlan=='3 month'){
-            req.body.validityDays=60+differInDays
+            req.body.validityDays=90+differInDays
             req.body.subscriptionEndDate=moment(new Date()).add(90+differInDays,'days').toISOString()
               }
           if(req.body.subscriptionPlan=='6 month'){

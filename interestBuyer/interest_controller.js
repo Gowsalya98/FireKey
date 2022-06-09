@@ -62,30 +62,27 @@ exports.getAllInterestBuyerList =  async(req, res) => {
     try {
        if(req.headers.authorization){
            const userToken=jwt.decode(req.headers.authorization)
-
            if(userToken){
-            const data=await register.aggregate([{$match:{"_id":new mongoose.Types.ObjectId(userToken.id)}}])
-            if(data[0].paymentStatus=='paid'){
-                const datas=await transaction.aggregate([{$match:{"orderId":data[0].orderId}}])
-                if(datas.length!=0){
-                    if(data[0].subscriptionEndDate > moment(new Date()).toISOString()){
-                        const result=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}}]) 
-                        console.log(result.length)
-                     res.status(200).send({success:'true',message:'fetch data successfully',data})
-                    }else{
-                        const result=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}},{$match:{"userDetails.deleteFlag":false}},{$limit:2}])
-    
-                    res.status(200).send({success:'true',message:'subscription package was expired',data})}
+                const data=await register.aggregate([{$match:{"_id":new mongoose.Types.ObjectId(userToken.id)}}])
+                if(data[0].paymentStatus=='paid'){
+                        const datas=await transaction.aggregate([{$match:{"orderId":data[0].orderId}}])
+                    if(datas.length!=0){
+                        if(data[0].subscriptionEndDate > moment(new Date()).toISOString()){
+                            const result=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}}]) 
+                            console.log(result.length)
+                            res.status(200).send({success:'true',message:'fetch data successfully',data})
+                        }else{
+                            const result=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}},{$match:{"userDetails.deleteFlag":false}},{$limit:2}])
+                            res.status(200).send({success:'true',message:'subscription package was expired',data})}
                     }else{
                         res.status(401).send({success:'false',message:'Does not track your order id'})}
-                     }else{
-                        const data=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}},{$match:{"userDetails.deleteFlag":false}},{$limit:2}])
-
-                            res.status(200).send({success:'true',message:'fetch data successfully',data})}
-                    }else{
-                        res.status(400).send({success:'false',message:'invalid token'})}
-                     }else{
-                         res.status(400).send({success:'false',message:'unauthorized'})}
+                }else{
+                    const data=await interestBuyer.aggregate([{$match:{"interest":true}},{$unwind:{path:"$propertyDetails"}},{$unwind:{path:"$userDetails"}},{$match:{$and:[{'propertyDetails.propertyOwnerId':(userToken.id)},{"propertyDetails.deleteFlag":false}]}},{$match:{"userDetails.deleteFlag":false}},{$limit:2}])
+                    res.status(200).send({success:'true',message:'fetch data successfully',data})}
+            }else{
+                res.status(400).send({success:'false',message:'invalid token'})}
+        }else{
+            res.status(400).send({success:'false',message:'unauthorized'})}
     } catch (err) {
         res.status(500).send({message:'internal server error'})
     }
